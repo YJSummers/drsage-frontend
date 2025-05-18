@@ -1,7 +1,6 @@
 
-const treatmentButtons = document.querySelectorAll(".treatment-buttons button");
 let treatment = 'Blended';
-let chatHistory = [];
+let messages = [];
 
 function setTreatment(type) {
   treatment = type;
@@ -12,32 +11,13 @@ function setTreatment(type) {
 }
 
 async function getGuidance() {
-  const input = document.getElementById('symptomInput').value.trim();
-  const responseBox = document.getElementById('responseBox');
-  if (!input) {
-    responseBox.textContent = "Please describe your symptoms.";
-    return;
-  }
+  const input = document.getElementById("symptomInput").value.trim();
+  if (!input) return;
 
-  responseBox.textContent = "Dr. Sage is thinking...";
-  chatHistory.push("You: " + input);
-
-  const messages = [
-    {
-      role: "system",
-      content: "You are Dr. Sage, a compassionate and highly intelligent virtual medical assistant with full diagnostic capabilities. If the user's message is vague or non-specific (e.g., 'I have an earache'), you must ask follow-up questions to gather more details before offering an assessment or treatment. Adjust responses based on their preference for conventional, natural, or blended care."
-    },
-    ...chatHistory.map(text => {
-      return {
-        role: text.startsWith("You:") ? "user" : "assistant",
-        content: text.replace(/^You: |^Dr. Sage: /, "")
-      };
-    }),
-    {
-      role: "user",
-      content: `They prefer a ${treatment} approach. ${input}`
-    }
-  ];
+  const chatBox = document.getElementById("chatBox");
+  const fullInput = `They prefer a ${treatment} approach. ${input}`;
+  addMessageToUI("user", fullInput);
+  messages.push({ role: "user", content: fullInput });
 
   try {
     const res = await fetch("https://drsage-backend.onrender.com/drsage", {
@@ -47,16 +27,23 @@ async function getGuidance() {
     });
 
     const data = await res.json();
-    const reply = data.reply || "No response received.";
-    chatHistory.push("Dr. Sage: " + reply);
-    responseBox.textContent = reply;
-  } catch (err) {
-    const failMsg = "Something went wrong connecting to Dr. Sage.";
-    chatHistory.push("Dr. Sage: " + failMsg);
-    responseBox.textContent = failMsg;
+    messages.push({ role: "assistant", content: data.reply });
+    addMessageToUI("assistant", data.reply);
+  } catch {
+    const errorMsg = "Something went wrong connecting to Dr. Sage.";
+    messages.push({ role: "assistant", content: errorMsg });
+    addMessageToUI("assistant", errorMsg);
   }
 
-  document.getElementById('symptomInput').value = '';
+  document.getElementById("symptomInput").value = "";
+}
+
+function addMessageToUI(role, text) {
+  const msg = document.createElement("div");
+  msg.className = role;
+  msg.textContent = role === "user" ? `You: ${text}` : `Dr. Sage: ${text}`;
+  document.getElementById("chatBox").appendChild(msg);
+  document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
 }
 
 function startVoice() {
@@ -72,12 +59,9 @@ function startVoice() {
 }
 
 function exportChat() {
-  if (!chatHistory.length) {
-    alert("There's nothing to save yet!");
-    return;
-  }
-
-  const text = chatHistory.join("\n");
+  const text = messages.map(msg =>
+    msg.role === "user" ? `You: ${msg.content}` : `Dr. Sage: ${msg.content}`
+  ).join("\n");
   const blob = new Blob([text], { type: 'text/plain' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
