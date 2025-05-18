@@ -25,10 +25,11 @@ body {
 }
 
 .logo {
-  width: 100px;
-  margin: 0 auto 1rem;
+  width: 120px;
+  height: auto;
   display: block;
-}
+  margin: 0 auto 1rem;
+ }
 
 .subtitle {
   text-align: center;
