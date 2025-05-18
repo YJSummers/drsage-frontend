@@ -2,7 +2,9 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: #2e1a47;
+  background: url('assets/background-caduceus.jpg') no-repeat center center fixed;
+  background-size: cover;
+  background-color: #2e1a47;
   color: white;
 }
 .app {
