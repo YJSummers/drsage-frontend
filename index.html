@@ -3,76 +3,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dr. Sage</title>
-  <link rel="stylesheet" href="App.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dr. Sage – AI Healing Specialist</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-container">
-    <div class="card">
-      <img src="logo.png" alt="Dr. Sage Logo" class="logo" />
-      <div class="subtitle">Your AI Diagnostic & Healing Specialist</div>
+
+  <div class="app">
+    <div class="glass-card">
+      <img src="assets/images/dr-sage-logo.png" alt="Dr. Sage Logo" class="logo"/>
+      <h1 class="text-center title">Dr. Sage</h1>
+      <p class="subtitle text-center">Your AI Diagnostic & Healing Specialist</p>
+
       <div class="treatment-buttons">
-        <button class="active" onclick="setTreatment('Conventional')">Conventional</button>
-        <button onclick="setTreatment('Natural')">Natural</button>
-        <button onclick="setTreatment('Blended')">Blended</button>
+        <button onclick="setTreatment('Conventional')" id="btn-Conventional">Conventional</button>
+        <button onclick="setTreatment('Natural')" id="btn-Natural">Natural</button>
+        <button onclick="setTreatment('Blended')" id="btn-Blended" class="active">Blended</button>
       </div>
-      <textarea id="symptomInput" placeholder="Describe your symptoms..."></textarea>
-      <button class="submit-btn" onclick="submitSymptom()">Get Guidance</button>
-      <div id="responseBox" class="response-box">Dr. Sage’s response will appear here...</div>
+
+      <div class="input-group">
+        <textarea id="symptomInput" rows="3" placeholder="Describe your symptoms..."></textarea>
+        <button class="mic-btn" onclick="startVoice()">🎙️</button>
+      </div>
+
+      <button class="submit-btn" onclick="getGuidance()">Get Guidance</button>
+      <div id="responseBox" class="response-box"></div>
+
+      <button class="save-btn" onclick="exportChat()">💾 Save Results</button>
+
       <footer>
-        Powered by <a href="#">Operational Excellence Advisors</a>
+        Powered by <a href="https://youroea.biz" target="_blank">Operational Excellence Advisors</a>
       </footer>
     </div>
   </div>
 
   <script>
-    let treatment = "Conventional";
+    let treatment = 'Blended';
+    let chatHistory = [];
 
     function setTreatment(type) {
       treatment = type;
-      document.querySelectorAll('.treatment-buttons button').forEach(btn => {
-        btn.classList.remove('active');
+      ['Conventional', 'Natural', 'Blended'].forEach(id => {
+        document.getElementById(`btn-${id}`).classList.remove('active');
       });
-      event.target.classList.add('active');
+      document.getElementById(`btn-${type}`).classList.add('active');
     }
 
-    async function submitSymptom() {
-      const symptom = document.getElementById("symptomInput").value;
-      const responseBox = document.getElementById("responseBox");
-
-      if (!symptom.trim()) {
-        responseBox.textContent = "Please describe your symptoms first.";
+    async function getGuidance() {
+      const input = document.getElementById('symptomInput').value.trim();
+      const responseBox = document.getElementById('responseBox');
+      if (!input) {
+        responseBox.textContent = "Please describe your symptoms.";
         return;
       }
 
       responseBox.textContent = "Dr. Sage is thinking...";
-
-      const messages = [
-        {
-          role: "system",
-          content: `You are Dr. Sage, a compassionate and highly intelligent virtual medical assistant with full diagnostic capabilities. If the user's message is vague or non-specific (e.g., 'I have an earache'), you must ask follow-up questions to gather more details before offering an assessment or treatment. Adjust responses based on their preference for conventional, natural, or blended care.`
-        },
-        {
-          role: "user",
-          content: `They prefer a ${treatment} approach. ${symptom}`
-        }
-      ];
+      chatHistory.push("You: " + input);
 
       try {
         const res = await fetch("https://drsage-backend.onrender.com/drsage", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages })
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "user",
+                content: `They prefer a ${treatment} approach. ${input}`
+              }
+            ]
+          })
         });
 
         const data = await res.json();
-        responseBox.textContent = data.reply || "No response received.";
+        const reply = data.reply || "No response received.";
+        responseBox.textContent = reply;
+        chatHistory.push("Dr. Sage: " + reply);
       } catch (err) {
         responseBox.textContent = "Something went wrong connecting to Dr. Sage.";
+        chatHistory.push("Dr. Sage: Connection error.");
       }
     }
+
+    function startVoice() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+      recognition.onresult = function(event) {
+        document.getElementById('symptomInput').value = event.results[0][0].transcript;
+      };
+      recognition.onerror = function(event) {
+        alert("Voice recognition failed: " + event.error);
+      };
+    }
+
+    function exportChat() {
+      if (!chatHistory.length) {
+        alert("There's nothing to save yet!");
+        return;
+      }
+
+      const text = chatHistory.join("\n");
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'drsage_chat.txt';
+      link.click();
+    }
   </script>
+
 </body>
 </html>
