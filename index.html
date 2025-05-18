@@ -1,1 +1,56 @@
-<!-- placeholder, will be updated next -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dr. Sage – AI Healing Specialist</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+    <div class="glass-card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <img src="assets/drsage-logo.png" alt="Dr. Sage Logo" style="
+          max-width: 220px;
+          background-color: white;
+          padding: 10px 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        " />
+      </div>
+
+      <h1 class="text-center title">Dr. Sage</h1>
+      <p class="subtitle text-center">Your AI Diagnostic & Healing Specialist</p>
+
+      <p style="text-align: center; margin-top: 1rem; font-weight: bold;">
+        Choose your preferred treatment method:
+      </p>
+
+      <div class="treatment-buttons">
+        <button onclick="setTreatment('Conventional')" id="btn-Conventional">Conventional</button>
+        <button onclick="setTreatment('Natural')" id="btn-Natural">Natural</button>
+        <button onclick="setTreatment('Blended')" id="btn-Blended" class="active">Blended</button>
+      </div>
+
+      <div class="input-group">
+        <textarea id="symptomInput" rows="3" placeholder="Describe your symptoms..."></textarea>
+        <button class="mic-btn" onclick="startVoice()">🎙️</button>
+      </div>
+
+      <button class="submit-btn" onclick="getGuidance()">Get Guidance</button>
+
+      <div id="chatBox" class="chat-box"></div>
+
+      <button class="save-btn" onclick="exportChat()">💾 Save Results</button>
+
+      <footer>
+        Powered by <a href="https://youroea.biz" target="_blank">Operational Excellence Advisors</a>
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
