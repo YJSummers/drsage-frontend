@@ -3,113 +3,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dr. Sage – AI Healing Specialist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Sage</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <div class="app">
     <div class="glass-card">
-      <img src="assets/images/dr-sage-logo.png" alt="Dr. Sage Logo" class="logo"/>
-      <h1 class="text-center title">Dr. Sage</h1>
-      <p class="subtitle text-center">Your AI Diagnostic & Healing Specialist</p>
-
+      <img src="drsage-logo.png" alt="Dr. Sage Logo" class="logo" />
+      <h1>Dr. Sage</h1>
+      <p class="subtitle">Your AI Diagnostic & Healing Specialist</p>
       <div class="treatment-buttons">
-        <button onclick="setTreatment('Conventional')" id="btn-Conventional">Conventional</button>
-        <button onclick="setTreatment('Natural')" id="btn-Natural">Natural</button>
-        <button onclick="setTreatment('Blended')" id="btn-Blended" class="active">Blended</button>
+        <button id="conventional">Conventional</button>
+        <button id="natural">Natural</button>
+        <button id="blended" class="active">Blended</button>
       </div>
-
-      <div class="input-group">
-        <textarea id="symptomInput" rows="3" placeholder="Describe your symptoms..."></textarea>
-        <button class="mic-btn" onclick="startVoice()">🎙️</button>
-      </div>
-
+      <textarea id="symptomInput" placeholder="Describe your symptoms..."></textarea>
+      <button id="voiceInput" title="Speak your symptom">🎙️</button>
       <button class="submit-btn" onclick="getGuidance()">Get Guidance</button>
       <div id="responseBox" class="response-box"></div>
-
-      <button class="save-btn" onclick="exportChat()">💾 Save Results</button>
-
+      <button onclick="saveToFile()" class="submit-btn">💾 Save Results</button>
       <footer>
         Powered by <a href="https://youroea.biz" target="_blank">Operational Excellence Advisors</a>
       </footer>
     </div>
   </div>
-
-  <script>
-    let treatment = 'Blended';
-    let chatHistory = [];
-
-    function setTreatment(type) {
-      treatment = type;
-      ['Conventional', 'Natural', 'Blended'].forEach(id => {
-        document.getElementById(`btn-${id}`).classList.remove('active');
-      });
-      document.getElementById(`btn-${type}`).classList.add('active');
-    }
-
-    async function getGuidance() {
-      const input = document.getElementById('symptomInput').value.trim();
-      const responseBox = document.getElementById('responseBox');
-      if (!input) {
-        responseBox.textContent = "Please describe your symptoms.";
-        return;
-      }
-
-      responseBox.textContent = "Dr. Sage is thinking...";
-      chatHistory.push("You: " + input);
-
-      try {
-        const res = await fetch("https://drsage-backend.onrender.com/drsage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "user",
-                content: `They prefer a ${treatment} approach. ${input}`
-              }
-            ]
-          })
-        });
-
-        const data = await res.json();
-        const reply = data.reply || "No response received.";
-        responseBox.textContent = reply;
-        chatHistory.push("Dr. Sage: " + reply);
-      } catch (err) {
-        responseBox.textContent = "Something went wrong connecting to Dr. Sage.";
-        chatHistory.push("Dr. Sage: Connection error.");
-      }
-    }
-
-    function startVoice() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.start();
-      recognition.onresult = function(event) {
-        document.getElementById('symptomInput').value = event.results[0][0].transcript;
-      };
-      recognition.onerror = function(event) {
-        alert("Voice recognition failed: " + event.error);
-      };
-    }
-
-    function exportChat() {
-      if (!chatHistory.length) {
-        alert("There's nothing to save yet!");
-        return;
-      }
-
-      const text = chatHistory.join("\n");
-      const blob = new Blob([text], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'drsage_chat.txt';
-      link.click();
-    }
-  </script>
-
+  <script src="script.js"></script>
 </body>
 </html>
