@@ -1,1 +1,103 @@
-/* placeholder, will be updated next */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom, #2e1a47, #3a245e);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 10px;
+  width: 120px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.method-label {
+  display: block;
+  text-align: center;
+  margin: 1rem 0 0.5rem;
+  font-weight: bold;
+}
+
+.treatment-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.treatment-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #7c3aed;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.treatment-buttons button.active {
+  background: gold;
+  color: #2e1a47;
+}
+
+textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  font-family: inherit;
+  margin-bottom: 0.5rem;
+  resize: vertical;
+  min-height: 60px;
+}
+
+button {
+  display: block;
+  margin: 0.5rem auto;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  background: white;
+  color: #2e1a47;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#responseBox {
+  margin-top: 1rem;
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  min-height: 80px;
+}
+
+footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+footer a { color: gold; }
