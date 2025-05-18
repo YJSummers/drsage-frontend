@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Sage</title>
+  <link rel="stylesheet" href="App.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+</head>
+<body>
+  <div class="app-container">
+    <div class="card">
+      <img src="logo.png" alt="Dr. Sage Logo" class="logo" />
+      <div class="subtitle">Your AI Diagnostic & Healing Specialist</div>
+      <div class="treatment-buttons">
+        <button class="active" onclick="setTreatment('Conventional')">Conventional</button>
+        <button onclick="setTreatment('Natural')">Natural</button>
+        <button onclick="setTreatment('Blended')">Blended</button>
+      </div>
+      <textarea id="symptomInput" placeholder="Describe your symptoms..."></textarea>
+      <button class="submit-btn" onclick="submitSymptom()">Get Guidance</button>
+      <div id="responseBox" class="response-box">Dr. Sage’s response will appear here...</div>
+      <footer>
+        Powered by <a href="#">Operational Excellence Advisors</a>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    let treatment = "Conventional";
+
+    function setTreatment(type) {
+      treatment = type;
+      document.querySelectorAll('.treatment-buttons button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    async function submitSymptom() {
+      const symptom = document.getElementById("symptomInput").value;
+      const responseBox = document.getElementById("responseBox");
+
+      if (!symptom.trim()) {
+        responseBox.textContent = "Please describe your symptoms first.";
+        return;
+      }
+
+      responseBox.textContent = "Dr. Sage is thinking...";
+
+      const messages = [
+        {
+          role: "system",
+          content: `You are Dr. Sage, a compassionate and highly intelligent virtual medical assistant with full diagnostic capabilities. If the user's message is vague or non-specific (e.g., 'I have an earache'), you must ask follow-up questions to gather more details before offering an assessment or treatment. Adjust responses based on their preference for conventional, natural, or blended care.`
+        },
+        {
+          role: "user",
+          content: `They prefer a ${treatment} approach. ${symptom}`
+        }
+      ];
+
+      try {
+        const res = await fetch("https://drsage-backend.onrender.com/drsage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages })
+        });
+
+        const data = await res.json();
+        responseBox.textContent = data.reply || "No response received.";
+      } catch (err) {
+        responseBox.textContent = "Something went wrong connecting to Dr. Sage.";
+      }
+    }
+  </script>
+</body>
+</html>
