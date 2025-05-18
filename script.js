@@ -1,60 +1,86 @@
 
 const treatmentButtons = document.querySelectorAll(".treatment-buttons button");
-let selectedTreatment = "Blended";
+let treatment = 'Blended';
+let chatHistory = [];
 
-treatmentButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    treatmentButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    selectedTreatment = btn.textContent;
+function setTreatment(type) {
+  treatment = type;
+  ['Conventional', 'Natural', 'Blended'].forEach(id => {
+    document.getElementById(`btn-${id}`).classList.remove('active');
   });
-});
+  document.getElementById(`btn-${type}`).classList.add('active');
+}
 
-function getGuidance() {
-  const input = document.getElementById("symptomInput").value.trim();
-  const box = document.getElementById("responseBox");
+async function getGuidance() {
+  const input = document.getElementById('symptomInput').value.trim();
+  const responseBox = document.getElementById('responseBox');
   if (!input) {
-    box.textContent = "Please describe your symptoms.";
+    responseBox.textContent = "Please describe your symptoms.";
     return;
   }
 
-  box.textContent = "Dr. Sage is thinking...";
-  fetch("https://drsage-backend.onrender.com/drsage", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: [
-        {
-          role: "system",
-          content: "You are Dr. Sage, an intelligent and empathetic virtual health advisor.",
-        },
-        {
-          role: "user",
-          content: `They prefer a ${selectedTreatment} approach. ${input}`,
-        }
-      ]
-    })
-  })
-    .then(res => res.json())
-    .then(data => box.textContent = data.reply)
-    .catch(() => box.textContent = "Something went wrong. Try again later.");
+  responseBox.textContent = "Dr. Sage is thinking...";
+  chatHistory.push("You: " + input);
+
+  const messages = [
+    {
+      role: "system",
+      content: "You are Dr. Sage, a compassionate and highly intelligent virtual medical assistant with full diagnostic capabilities. If the user's message is vague or non-specific (e.g., 'I have an earache'), you must ask follow-up questions to gather more details before offering an assessment or treatment. Adjust responses based on their preference for conventional, natural, or blended care."
+    },
+    ...chatHistory.map(text => {
+      return {
+        role: text.startsWith("You:") ? "user" : "assistant",
+        content: text.replace(/^You: |^Dr. Sage: /, "")
+      };
+    }),
+    {
+      role: "user",
+      content: `They prefer a ${treatment} approach. ${input}`
+    }
+  ];
+
+  try {
+    const res = await fetch("https://drsage-backend.onrender.com/drsage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages })
+    });
+
+    const data = await res.json();
+    const reply = data.reply || "No response received.";
+    chatHistory.push("Dr. Sage: " + reply);
+    responseBox.textContent = reply;
+  } catch (err) {
+    const failMsg = "Something went wrong connecting to Dr. Sage.";
+    chatHistory.push("Dr. Sage: " + failMsg);
+    responseBox.textContent = failMsg;
+  }
+
+  document.getElementById('symptomInput').value = '';
 }
 
-function saveToFile() {
-  const content = document.getElementById("responseBox").textContent;
-  if (!content) return;
-  const blob = new Blob([content], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "drsage_result.txt";
-  a.click();
-}
-
-document.getElementById("voiceInput").addEventListener("click", () => {
+function startVoice() {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.lang = "en-US";
+  recognition.lang = 'en-US';
   recognition.start();
-  recognition.onresult = e => {
-    document.getElementById("symptomInput").value = e.results[0][0].transcript;
+  recognition.onresult = function(event) {
+    document.getElementById('symptomInput').value = event.results[0][0].transcript;
   };
-});
+  recognition.onerror = function(event) {
+    alert("Voice recognition failed: " + event.error);
+  };
+}
+
+function exportChat() {
+  if (!chatHistory.length) {
+    alert("There's nothing to save yet!");
+    return;
+  }
+
+  const text = chatHistory.join("\n");
+  const blob = new Blob([text], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'drsage_chat.txt';
+  link.click();
+}
